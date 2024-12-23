@@ -6,7 +6,7 @@
 /*   By: lperis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/17 11:27:06 by lperis            #+#    #+#             */
-/*   Updated: 2024/12/22 17:14:12 by lperis           ###   ########.fr       */
+/*   Updated: 2024/12/23 17:00:22 by lperis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ typedef struct s_data
 void	check_file(t_data *data, char **argv);
 void	checkpath(t_data *data);
 int		ft_access(t_data *data);
-void	pipeprocess(t_data *data, int pipe_direction);
+void	pipeprocess(t_data *data, int pipe_direction, char **argv);
 void	child_process(t_data *data, char **argv, int pipe_direction, int i);
 void	process(t_data *data, char **argv);
 void	set_data(t_data *data, int argc, char **argv, char **envp);

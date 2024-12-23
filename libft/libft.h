@@ -6,7 +6,7 @@
 /*   By: lperis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 19:17:08 by lperis            #+#    #+#             */
-/*   Updated: 2024/10/29 14:55:55 by lperis           ###   ########.fr       */
+/*   Updated: 2024/12/23 15:38:13 by lperis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,6 @@ void	ft_lstdelone(t_list *lst, void (*del)(void*));
 void	ft_lstclear(t_list **lst, void (*del)(void*));
 void	ft_lstiter(t_list *lst, void (*f)(void *));
 t_list	*ft_lstmap(t_list *lst, void *(*f)(void*), void(*del)(void *));
+int		ft_printf_pfd(int fd, const char *format, ...);
+
 #endif

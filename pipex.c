@@ -6,7 +6,7 @@
 /*   By: lperis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 12:38:02 by lperis            #+#    #+#             */
-/*   Updated: 2024/12/22 17:15:23 by lperis           ###   ########.fr       */
+/*   Updated: 2024/12/23 17:57:28 by lperis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,9 @@ void	ft_close(t_data *data)
 {
 	close(data->pfd[0]);
 	close(data->pfd[1]);
-	if (data->in_bool == 1)
+	if (data->in_fd > 0)
 		close(data->in_fd);
-	if (data->out_bool == 1)
+	if (data->out_fd > 1)
 		close(data->out_fd);
 }
 
@@ -35,19 +35,27 @@ void	ft_free_tab(char **tab)
 	free(tab);
 }
 
+//Manage error text and adapt it in the child process
 void	check_file(t_data *data, char **argv)
 {
-	data->in_bool = 0;
-	data->out_bool = 1;
-	if (access(argv[1], R_OK | F_OK) == 0)
+	data->in_fd = open(argv[1], O_RDONLY);
+	if (data->in_fd < 0)
 	{
-		data->in_fd = open(argv[1], O_RDONLY);
-		data->in_bool = 1;
-		dup2(data->in_fd, STDIN_FILENO);
+		if (access(argv[1], F_OK) != 0)
+			ft_printf_pfd(2, "No such file or directory %s\n", argv[1]);
+		else if (access(argv[1], R_OK) != 0)
+			ft_printf_pfd(2, "Permission denied %s\n", argv[1]);
 	}
+	else
+		dup2(data->in_fd, STDIN_FILENO);
 	data->out_fd = open(argv[4], O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	if (data->in_fd < 0)
+		return ;
 	if (data->out_fd < 0)
-		data->out_bool = 0;
+	{
+		if (access(argv[4], W_OK) != 0)
+			ft_printf_pfd(2, "permission denied %s\n", argv[4]);
+	}
 }
 
 void	checkpath(t_data *data)
@@ -96,6 +104,7 @@ int	get_path(t_data *data)
 		free(tmp);
 		i++;
 	}
+	ft_printf_pfd(2, "Command not found\n", data->cmd_flag[0]);
 	return (0);
 }
 
@@ -104,6 +113,9 @@ int	ft_access(t_data *data)
 	int		accs;
 
 	accs = 0;
+	if (data->cmd_flag[0] == NULL && data->in_fd >= 0 \
+		&& data->out_fd >= 0)
+		ft_printf_pfd(2, "Command not found\n", data->cmd_flag[0]);
 	if ((data->cmd_flag[0] == NULL) || \
 		(data->unset_path == 1 && data->f_path == 0))
 		return (0);
@@ -113,11 +125,14 @@ int	ft_access(t_data *data)
 	{
 		if (access(data->cmd_flag[0], X_OK) == 0)
 			accs = 1;
+		else if (data->in_fd >= 0 && data->out_fd >= 0)
+			ft_printf_pfd(2, "%s: No such file or directory\n", \
+				data->cmd_flag[0]);
 	}
 	return (accs);
 }
 
-void	pipeprocess(t_data *data, int pipe_direction)
+void	pipeprocess(t_data *data, int pipe_direction, char **argv)
 {
 	if (pipe_direction == 0)
 	{
@@ -129,6 +144,13 @@ void	pipeprocess(t_data *data, int pipe_direction)
 	{
 		close(data->pfd[1]);
 		dup2(data->pfd[0], STDIN_FILENO);
+		if (access(argv[4], W_OK) < 0)
+		{
+			free(data->cmd);
+			ft_free_tab(data->cmd_flag);
+			ft_free_tab(data->path);
+			exit(127);
+		}
 		dup2(data->out_fd, STDOUT_FILENO);
 		close(data->pfd[0]);
 	}
@@ -144,11 +166,11 @@ void	child_process(t_data *data, char **argv, int pipe_direction, int i)
 		pipe_direction = 0;
 	else if (data->cmd[i] == argv[3])
 		pipe_direction = 1;
-	pipeprocess(data, pipe_direction);
+	pipeprocess(data, pipe_direction, argv);
 	free(data->cmd);
 	if (data->unset_path != 1)
 		ft_free_tab(data->path);
-	if ((exec == 1 && data->in_bool == 1) || (exec == 1 && data->out_bool == 1))
+	if ((exec == 1 && data->in_fd > 0) || (exec == 1 && data->out_fd > 0))
 		execve(data->cmd_flag[0], data->cmd_flag, data->envp);
 	ft_free_tab(data->cmd_flag);
 	exit(127);
@@ -168,11 +190,11 @@ void	process(t_data *data, char **argv)
 	int	i;
 	int	pipe_direction;
 	int	pid;
-	int	cmd;
+	int	nb_cmd;
 
 	pipe_direction = 0;
 	i = 0;
-	cmd = data->nb_args;
+	nb_cmd = data->nb_args;
 	if (pipe(data->pfd) < 0)
 		return ;
 	while (data->nb_args != 0)
@@ -187,7 +209,7 @@ void	process(t_data *data, char **argv)
 	}
 	close(data->pfd[0]);
 	close(data->pfd[1]);
-	waitprocess(cmd);
+	waitprocess(nb_cmd);
 }
 
 void	set_path(t_data *data)
@@ -233,9 +255,9 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_data	data;
 
-	if (argc < 5)
+	if (argc < 4)
 	{
-		printf("larguboloss");
+		ft_putstr_fd("Not enough arguments", 2);
 		return (0);
 	}
 	set_data(&data, argc, argv, envp);
