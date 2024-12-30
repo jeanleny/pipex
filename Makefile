@@ -2,6 +2,8 @@ HEADER = libft/libft.h
 
 SRC =	pipex.c \
 
+LIBFTSRC =	libft/*.o \
+
 LIB_A = libft/libft.a
 
 NAME =  pipex
@@ -24,6 +26,7 @@ $(NAME) :	$(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean : 
+	$(RM) $(LIBFTSRC)
 	$(RM) $(OBJ)
 
 fclean :	clean		

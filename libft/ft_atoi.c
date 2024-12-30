@@ -12,12 +12,19 @@
 
 #include "libft.h"
 
+int	ft_long(int minus)
+{
+	if (minus == 1)
+		return (-1);
+	else
+		return (0);
+}
+
 int	ft_atoi(const char *nptr)
 {
 	int	res;
 	int	minus;
 	int	i;
-	
 
 	i = 0;
 	res = 0;
@@ -34,13 +41,10 @@ int	ft_atoi(const char *nptr)
 	{
 		if (res > (LLONG_MAX - (nptr[i] - '0') / 10))
 		{
-			if (minus == 1)
-				return (-1);
-			else
-				return (0);
+			minus = ft_long(minus);
+			return (minus);
 		}
-		res = res * 10 + nptr[i] - 48;
-		i++;
+		res = res * 10 + nptr[i++] - 48;
 	}
 	return (res * minus);
 }

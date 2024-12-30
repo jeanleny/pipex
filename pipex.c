@@ -149,6 +149,7 @@ void	pipeprocess(t_data *data, int pipe_direction, char **argv)
 			free(data->cmd);
 			ft_free_tab(data->cmd_flag);
 			ft_free_tab(data->path);
+			ft_close(data);
 			exit(127);
 		}
 		dup2(data->out_fd, STDOUT_FILENO);
@@ -173,6 +174,7 @@ void	child_process(t_data *data, char **argv, int pipe_direction, int i)
 	if ((exec == 1 && data->in_fd > 0) || (exec == 1 && data->out_fd > 0))
 		execve(data->cmd_flag[0], data->cmd_flag, data->envp);
 	ft_free_tab(data->cmd_flag);
+	ft_close(data);
 	exit(127);
 }
 
@@ -255,9 +257,9 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_data	data;
 
-	if (argc < 4)
+	if (argc != 5)
 	{
-		ft_putstr_fd("Not enough arguments", 2);
+		ft_putstr_fd("Wrong arguments", 2);
 		return (0);
 	}
 	set_data(&data, argc, argv, envp);
