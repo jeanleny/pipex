@@ -1,8 +1,12 @@
 HEADER = libft/libft.h
 
-SRC =	pipex.c \
+OBJDIR = obj_files
 
-LIBFTSRC =	libft/*.o \
+CDIR = src/
+
+SRC =	$(CDIR)pipex.c 		\
+		$(CDIR)pipex_utils.c	\
+		$(CDIR)pipex_check.c	\
 
 LIB_A = libft/libft.a
 
@@ -10,27 +14,30 @@ NAME =  pipex
 
 CFLAGS = -Wall -Werror -Wextra -g
 
-RM = rm -f 
+RM = rm -rf 
 
-OBJ = $(SRC:%.c=%.o) 
+OBJ = $(addprefix $(OBJDIR)/,$(SRC:$(CDIR)%.c=%.o)) 
 
 CC = cc
 
 all : $(NAME) 
 
 $(NAME) :	$(OBJ)
-			make -C libft
-			$(CC) $(CFLAGS) $(OBJ) $(LIB_A) -o $(NAME)
+			@make -C libft --no-print-directory
+			@$(CC) $(CFLAGS) $(OBJ) $(LIB_A) -o $(NAME)
+			@echo  "\e[1;4mPipex Compiled ✅"
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJDIR)/%.o: $(CDIR)%.c
+	@mkdir -p $(OBJDIR)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean : 
-	$(RM) $(LIBFTSRC)
-	$(RM) $(OBJ)
+	@$(RM) $(OBJ) $(OBJDIR)
+	@make clean -C libft --no-print-directory
 
 fclean :	clean		
-			$(RM) $(NAME)
+			@$(RM) $(NAME)
+			@make fclean -C libft --no-print-directory
 
 re : fclean all
 

@@ -6,7 +6,7 @@
 #    By: lperis <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/11 12:41:13 by lperis            #+#    #+#              #
-#    Updated: 2024/12/23 15:46:58 by lperis           ###   ########.fr        #
+#    Updated: 2025/01/05 16:33:37 by lperis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -75,16 +75,20 @@ BONUSOBJ = $(BONUSSRC:.c=.o)
 all : $(NAME) 
 
 bonus : $(BONUSOBJ) $(OBJ)
-	ar -rc $(NAME) $(OBJ) $(BONUSOBJ)
+	@ar -rc $(NAME) $(OBJ) $(BONUSOBJ)
 
 $(NAME) :	$(OBJ)
-			ar -rc $(NAME) $(OBJ)	
+			@ar -rc $(NAME) $(OBJ)	
+			@echo "\e[1;4mlibft compiled ✅"
+
+%.o: %.c
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean : 
-	$(RM) $(OBJ) $(BONUSOBJ)	
+	@$(RM) $(OBJ) $(BONUSOBJ)	
 
 fclean :	clean		
-			$(RM) $(NAME)
+			@$(RM) $(NAME)
 
 re : fclean all
 
